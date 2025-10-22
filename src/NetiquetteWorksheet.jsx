@@ -27,6 +27,8 @@ export default function NetiquetteWorksheet() {
   });
 
   const worksheetRef = useRef(null);
+  const hateSpeechSectionRef = useRef(null);
+  const fakeNewsSectionRef = useRef(null);
 
   const handleStudentInfoChange = (field, value) => {
     setStudentInfo(prev => ({ ...prev, [field]: value }));
@@ -72,20 +74,21 @@ export default function NetiquetteWorksheet() {
     }
   };
 
-  // 학습지 완성도 체크
+  // 혐오표현 섹션 완성도 체크
+  const isHateSpeechComplete = () => {
+    return ['hateDefinition', 'hateExample', 'hateExampleMeaning', 'hateProblem']
+      .every(field => answers[field]?.trim().length > 0);
+  };
+
+  // 가짜뉴스 섹션 완성도 체크
+  const isFakeNewsComplete = () => {
+    return ['fakeNewsDefinition', 'fakeNewsExample', 'fakeNewsSource', 'fakeNewsPrevention']
+      .every(field => answers[field]?.trim().length > 0);
+  };
+
+  // 전체 학습지 완성도 체크
   const isWorksheetComplete = () => {
-    const requiredFields = [
-      'hateDefinition',
-      'hateExample', 
-      'hateExampleMeaning',
-      'hateProblem',
-      'fakeNewsDefinition',
-      'fakeNewsExample',
-      'fakeNewsSource',
-      'fakeNewsPrevention'
-    ];
-    
-    return requiredFields.every(field => answers[field]?.trim().length > 0);
+    return isHateSpeechComplete() && isFakeNewsComplete();
   };
 
   // 포스터 기획 완성도 체크
@@ -162,6 +165,134 @@ export default function NetiquetteWorksheet() {
     } catch (error) {
       console.error('PNG 생성 오류:', error);
       alert('이미지 생성에 실패했습니다.');
+    } finally {
+      buttons.forEach(btn => btn.style.display = '');
+    }
+  };
+
+  // 혐오표현 섹션 PNG 다운로드
+  const downloadHateSpeechPNG = async () => {
+    if (!hateSpeechSectionRef.current) return;
+
+    const buttons = hateSpeechSectionRef.current.querySelectorAll('.section-download-button');
+    buttons.forEach(btn => btn.style.display = 'none');
+
+    try {
+      const canvas = await html2canvas(hateSpeechSectionRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff'
+      });
+
+      const link = document.createElement('a');
+      const studentName = studentInfo.name || '학생';
+      link.download = `혐오표현_학습결과_${studentName}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('PNG 생성 오류:', error);
+      alert('이미지 생성에 실패했습니다.');
+    } finally {
+      buttons.forEach(btn => btn.style.display = '');
+    }
+  };
+
+  // 혐오표현 섹션 PDF 다운로드
+  const downloadHateSpeechPDF = async () => {
+    if (!hateSpeechSectionRef.current) return;
+
+    const buttons = hateSpeechSectionRef.current.querySelectorAll('.section-download-button');
+    buttons.forEach(btn => btn.style.display = 'none');
+
+    try {
+      const canvas = await html2canvas(hateSpeechSectionRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+      const studentName = studentInfo.name || '학생';
+      pdf.save(`혐오표현_학습결과_${studentName}.pdf`);
+    } catch (error) {
+      console.error('PDF 생성 오류:', error);
+      alert('PDF 생성에 실패했습니다.');
+    } finally {
+      buttons.forEach(btn => btn.style.display = '');
+    }
+  };
+
+  // 가짜뉴스 섹션 PNG 다운로드
+  const downloadFakeNewsPNG = async () => {
+    if (!fakeNewsSectionRef.current) return;
+
+    const buttons = fakeNewsSectionRef.current.querySelectorAll('.section-download-button');
+    buttons.forEach(btn => btn.style.display = 'none');
+
+    try {
+      const canvas = await html2canvas(fakeNewsSectionRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff'
+      });
+
+      const link = document.createElement('a');
+      const studentName = studentInfo.name || '학생';
+      link.download = `가짜뉴스_학습결과_${studentName}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('PNG 생성 오류:', error);
+      alert('이미지 생성에 실패했습니다.');
+    } finally {
+      buttons.forEach(btn => btn.style.display = '');
+    }
+  };
+
+  // 가짜뉴스 섹션 PDF 다운로드
+  const downloadFakeNewsPDF = async () => {
+    if (!fakeNewsSectionRef.current) return;
+
+    const buttons = fakeNewsSectionRef.current.querySelectorAll('.section-download-button');
+    buttons.forEach(btn => btn.style.display = 'none');
+
+    try {
+      const canvas = await html2canvas(fakeNewsSectionRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+      const studentName = studentInfo.name || '학생';
+      pdf.save(`가짜뉴스_학습결과_${studentName}.pdf`);
+    } catch (error) {
+      console.error('PDF 생성 오류:', error);
+      alert('PDF 생성에 실패했습니다.');
     } finally {
       buttons.forEach(btn => btn.style.display = '');
     }
@@ -302,127 +433,183 @@ export default function NetiquetteWorksheet() {
           </div>
 
           <div className="p-8 space-y-8">
-            <section className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-200">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="bg-orange-500 rounded-full p-4">
-                  <AlertCircle className="w-8 h-8 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">혐오표현이란 무엇인가요?</h2>
-                  <div className="flex items-center gap-2 text-red-600">
-                    <Heart className="w-5 h-5" />
-                    <Share2 className="w-5 h-5" />
+            {/* 혐오표현 섹션 시작 */}
+            <div ref={hateSpeechSectionRef}>
+              <section className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-200">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="bg-orange-500 rounded-full p-4">
+                    <AlertCircle className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">혐오표현이란 무엇인가요?</h2>
+                    <div className="flex items-center gap-2 text-red-600">
+                      <Heart className="w-5 h-5" />
+                      <Share2 className="w-5 h-5" />
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              <textarea
-                value={answers.hateDefinition}
-                onChange={(e) => handleAnswerChange('hateDefinition', e.target.value)}
-                placeholder="혐오표현의 정의를 써보세요..."
-                className="w-full p-4 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none min-h-[100px] transition-colors"
-              />
-            </section>
-
-            <section className="bg-yellow-50 rounded-xl p-6 border-2 border-yellow-200">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
-                혐오표현의 예시를 찾아보고, 그 뜻이 무엇인지 찾아 써보세요.
-              </h3>
-              
-              <div className="bg-white p-4 rounded-lg mb-4 border-l-4 border-yellow-400">
-                <p className="text-sm text-gray-600 mb-2">💡 예시 설명:</p>
-                <p className="text-sm text-gray-700">
-                  '맘충'은 '엄마(mom)'와 '벌레(충)'를 합친 신조어로, 주로 공공장소에서 예의 없이 행동하거나 타인에게 불편을 주는 일부 엄마들을 비하하는 의미
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  value={answers.hateExample}
-                  onChange={(e) => handleAnswerChange('hateExample', e.target.value)}
-                  placeholder="찾은 혐오표현 예시를 써보세요..."
-                  className="w-full p-4 border-2 border-yellow-300 rounded-lg focus:border-yellow-500 focus:outline-none transition-colors"
-                />
                 
                 <textarea
-                  value={answers.hateExampleMeaning}
-                  onChange={(e) => handleAnswerChange('hateExampleMeaning', e.target.value)}
-                  placeholder="그 혐오표현이 어떤 의미인지 설명해보세요..."
-                  className="w-full p-4 border-2 border-yellow-300 rounded-lg focus:border-yellow-500 focus:outline-none min-h-[120px] transition-colors"
+                  value={answers.hateDefinition}
+                  onChange={(e) => handleAnswerChange('hateDefinition', e.target.value)}
+                  placeholder="혐오표현의 정의를 써보세요..."
+                  className="w-full p-4 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none min-h-[100px] transition-colors"
                 />
-              </div>
-            </section>
+              </section>
 
-            <section className="bg-red-50 rounded-xl p-6 border-2 border-red-200">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
-                혐오표현을 쓰면 어떤 문제가 일어날까요?
-              </h3>
-              
-              <textarea
-                value={answers.hateProblem}
-                onChange={(e) => handleAnswerChange('hateProblem', e.target.value)}
-                placeholder="혐오표현의 문제점을 생각해서 써보세요..."
-                className="w-full p-4 border-2 border-red-300 rounded-lg focus:border-red-500 focus:outline-none min-h-[120px] transition-colors"
-              />
-            </section>
+              <section className="bg-yellow-50 rounded-xl p-6 border-2 border-yellow-200 mt-4">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">
+                  혐오표현의 예시를 찾아보고, 그 뜻이 무엇인지 찾아 써보세요.
+                </h3>
+                
+                <div className="bg-white p-4 rounded-lg mb-4 border-l-4 border-yellow-400">
+                  <p className="text-sm text-gray-600 mb-2">💡 예시 설명:</p>
+                  <p className="text-sm text-gray-700">
+                    '맘충'은 '엄마(mom)'와 '벌레(충)'를 합친 신조어로, 주로 공공장소에서 예의 없이 행동하거나 타인에게 불편을 주는 일부 엄마들을 비하하는 의미
+                  </p>
+                </div>
 
-            <section className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 mt-8">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="bg-blue-500 rounded-lg p-4">
-                  <div className="w-16 h-12 bg-white rounded flex items-center justify-center relative">
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0 h-0 border-l-8 border-l-red-500 border-t-6 border-t-transparent border-b-6 border-b-transparent"></div>
-                    <span className="text-xs font-bold text-orange-600 bg-orange-200 px-2 py-1 rounded absolute -bottom-2 -right-2">FAKE</span>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={answers.hateExample}
+                    onChange={(e) => handleAnswerChange('hateExample', e.target.value)}
+                    placeholder="찾은 혐오표현 예시를 써보세요..."
+                    className="w-full p-4 border-2 border-yellow-300 rounded-lg focus:border-yellow-500 focus:outline-none transition-colors"
+                  />
+                  
+                  <textarea
+                    value={answers.hateExampleMeaning}
+                    onChange={(e) => handleAnswerChange('hateExampleMeaning', e.target.value)}
+                    placeholder="그 혐오표현이 어떤 의미인지 설명해보세요..."
+                    className="w-full p-4 border-2 border-yellow-300 rounded-lg focus:border-yellow-500 focus:outline-none min-h-[120px] transition-colors"
+                  />
+                </div>
+              </section>
+
+              <section className="bg-red-50 rounded-xl p-6 border-2 border-red-200 mt-4">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">
+                  혐오표현을 쓰면 어떤 문제가 일어날까요?
+                </h3>
+                
+                <textarea
+                  value={answers.hateProblem}
+                  onChange={(e) => handleAnswerChange('hateProblem', e.target.value)}
+                  placeholder="혐오표현의 문제점을 생각해서 써보세요..."
+                  className="w-full p-4 border-2 border-red-300 rounded-lg focus:border-red-500 focus:outline-none min-h-[120px] transition-colors"
+                />
+              </section>
+
+              {/* 혐오표현 섹션 다운로드 버튼 */}
+              {isHateSpeechComplete() && (
+                <div className="mt-4 flex flex-col sm:flex-row gap-3 section-download-button">
+                  <div className="flex items-center gap-2 text-orange-600 flex-1">
+                    <CheckCircle className="w-5 h-5" />
+                    <span className="text-sm font-semibold">혐오표현 학습 완료!</span>
+                  </div>
+                  <button
+                    onClick={downloadHateSpeechPNG}
+                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-md hover:shadow-lg"
+                  >
+                    <Download className="w-4 h-4" />
+                    혐오표현 학습결과 PNG
+                  </button>
+                  <button
+                    onClick={downloadHateSpeechPDF}
+                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg"
+                  >
+                    <Download className="w-4 h-4" />
+                    혐오표현 학습결과 PDF
+                  </button>
+                </div>
+              )}
+            </div>
+            {/* 혐오표현 섹션 끝 */}
+
+            {/* 가짜뉴스 섹션 시작 */}
+            <div ref={fakeNewsSectionRef}>
+              <section className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 mt-8">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="bg-blue-500 rounded-lg p-4">
+                    <div className="w-16 h-12 bg-white rounded flex items-center justify-center relative">
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0 h-0 border-l-8 border-l-red-500 border-t-6 border-t-transparent border-b-6 border-b-transparent"></div>
+                      <span className="text-xs font-bold text-orange-600 bg-orange-200 px-2 py-1 rounded absolute -bottom-2 -right-2">FAKE</span>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-gray-800">가짜뉴스란 무엇인가요?</h2>
                   </div>
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-gray-800">가짜뉴스란 무엇인가요?</h2>
-                </div>
-              </div>
-              
-              <textarea
-                value={answers.fakeNewsDefinition}
-                onChange={(e) => handleAnswerChange('fakeNewsDefinition', e.target.value)}
-                placeholder="가짜뉴스의 정의를 써보세요..."
-                className="w-full p-4 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none min-h-[100px] transition-colors"
-              />
-            </section>
-
-            <section className="bg-indigo-50 rounded-xl p-6 border-2 border-indigo-200">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
-                가짜 뉴스의 사례에는 어떤 것이 있는지 하나만 찾아보세요. (출처 쓰기)
-              </h3>
-              
-              <div className="space-y-4">
-                <textarea
-                  value={answers.fakeNewsExample}
-                  onChange={(e) => handleAnswerChange('fakeNewsExample', e.target.value)}
-                  placeholder="찾은 가짜뉴스 사례를 써보세요..."
-                  className="w-full p-4 border-2 border-indigo-300 rounded-lg focus:border-indigo-500 focus:outline-none min-h-[100px] transition-colors"
-                />
                 
-                <input
-                  type="text"
-                  value={answers.fakeNewsSource}
-                  onChange={(e) => handleAnswerChange('fakeNewsSource', e.target.value)}
-                  placeholder="출처를 써보세요 (예: 팩트체크 사이트, 뉴스 기사 등)"
-                  className="w-full p-4 border-2 border-indigo-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors"
+                <textarea
+                  value={answers.fakeNewsDefinition}
+                  onChange={(e) => handleAnswerChange('fakeNewsDefinition', e.target.value)}
+                  placeholder="가짜뉴스의 정의를 써보세요..."
+                  className="w-full p-4 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none min-h-[100px] transition-colors"
                 />
-              </div>
-            </section>
+              </section>
 
-            <section className="bg-purple-50 rounded-xl p-6 border-2 border-purple-200">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
-                가짜 뉴스를 예방하기 위해서 어떻게 해야 할까요?
-              </h3>
-              
-              <textarea
-                value={answers.fakeNewsPrevention}
-                onChange={(e) => handleAnswerChange('fakeNewsPrevention', e.target.value)}
-                placeholder="가짜뉴스를 예방하는 방법을 생각해서 써보세요..."
-                className="w-full p-4 border-2 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none min-h-[120px] transition-colors"
-              />
-            </section>
+              <section className="bg-indigo-50 rounded-xl p-6 border-2 border-indigo-200 mt-4">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">
+                  가짜 뉴스의 사례에는 어떤 것이 있는지 하나만 찾아보세요. (출처 쓰기)
+                </h3>
+                
+                <div className="space-y-4">
+                  <textarea
+                    value={answers.fakeNewsExample}
+                    onChange={(e) => handleAnswerChange('fakeNewsExample', e.target.value)}
+                    placeholder="찾은 가짜뉴스 사례를 써보세요..."
+                    className="w-full p-4 border-2 border-indigo-300 rounded-lg focus:border-indigo-500 focus:outline-none min-h-[100px] transition-colors"
+                  />
+                  
+                  <input
+                    type="text"
+                    value={answers.fakeNewsSource}
+                    onChange={(e) => handleAnswerChange('fakeNewsSource', e.target.value)}
+                    placeholder="출처를 써보세요 (예: 팩트체크 사이트, 뉴스 기사 등)"
+                    className="w-full p-4 border-2 border-indigo-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors"
+                  />
+                </div>
+              </section>
+
+              <section className="bg-purple-50 rounded-xl p-6 border-2 border-purple-200 mt-4">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">
+                  가짜 뉴스를 예방하기 위해서 어떻게 해야 할까요?
+                </h3>
+                
+                <textarea
+                  value={answers.fakeNewsPrevention}
+                  onChange={(e) => handleAnswerChange('fakeNewsPrevention', e.target.value)}
+                  placeholder="가짜뉴스를 예방하는 방법을 생각해서 써보세요..."
+                  className="w-full p-4 border-2 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none min-h-[120px] transition-colors"
+                />
+              </section>
+
+              {/* 가짜뉴스 섹션 다운로드 버튼 */}
+              {isFakeNewsComplete() && (
+                <div className="mt-4 flex flex-col sm:flex-row gap-3 section-download-button">
+                  <div className="flex items-center gap-2 text-blue-600 flex-1">
+                    <CheckCircle className="w-5 h-5" />
+                    <span className="text-sm font-semibold">가짜뉴스 학습 완료!</span>
+                  </div>
+                  <button
+                    onClick={downloadFakeNewsPNG}
+                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all shadow-md hover:shadow-lg"
+                  >
+                    <Download className="w-4 h-4" />
+                    가짜뉴스 학습결과 PNG
+                  </button>
+                  <button
+                    onClick={downloadFakeNewsPDF}
+                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all shadow-md hover:shadow-lg"
+                  >
+                    <Download className="w-4 h-4" />
+                    가짜뉴스 학습결과 PDF
+                  </button>
+                </div>
+              )}
+            </div>
+            {/* 가짜뉴스 섹션 끝 */}
 
             <section className="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 border-2 border-green-300">
               <h3 className="text-xl font-bold text-gray-800 mb-2">
@@ -523,7 +710,8 @@ export default function NetiquetteWorksheet() {
 
             {!isWorksheetComplete() && (
               <p className="text-center text-sm text-gray-500">
-                💡 모든 질문에 답변을 작성하면 학습지를 다운로드할 수 있습니다.
+                💡 혐오표현 또는 가짜뉴스 섹션을 완성하면 각 섹션별로 다운로드할 수 있습니다.<br />
+                모든 질문에 답변하면 전체 학습지를 다운로드할 수 있습니다.
               </p>
             )}
           </div>
@@ -536,6 +724,9 @@ export default function NetiquetteWorksheet() {
             background: white;
           }
           .action-button {
+            display: none !important;
+          }
+          .section-download-button {
             display: none !important;
           }
         }
