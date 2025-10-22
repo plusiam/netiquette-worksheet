@@ -499,6 +499,14 @@ export default function NetiquetteWorksheet() {
                 <Printer className="w-5 h-5" />
                 인쇄하기
               </button>
+
+              <button
+                onClick={handleReset}
+                className="flex items-center justify-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-all shadow-lg hover:shadow-xl"
+              >
+                <RotateCcw className="w-5 h-5" />
+                새로 시작하기
+              </button>
             </div>
 
             {isPosterPlanComplete() && (
